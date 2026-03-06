@@ -3,13 +3,16 @@ import mongoose from "mongoose";
 import helmet from "helmet";
 //import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 //import cookieParser = require("cookie-parser");
 
-import userRoutes from "./routes/user.routes";
+import userRoutes from "./routes/user";
+import protectedRoutes from "./routes/protected";
 
 dotenv.config();
 
 const app = express();
+app.use(express.static(path.join(__dirname, "./views")));
 
 //Environment variables
 const PORT = process.env.PORT || 4000;
@@ -42,7 +45,8 @@ mongoose
   .catch((err) => console.log("MongoDB connection error:", err));
 
 //Routes
-app.use("/api", userRoutes);
+app.use("/user", userRoutes);
+app.use("/protected", protectedRoutes);
 
 //Start server
 app.listen(PORT, () => {
