@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User List</title>
+
+<style>
+body {
+  font-family: Arial;
+  background:#f4f4f4;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:50px;
+  height:100vh;
+}
+
+.container {
+  background:white;
+  padding:30px;
+  border-radius:8px;
+  width:400px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align:center;
+}
+
+.nav-links {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+.nav-links a {
+  color:#2c7be5;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+ul {
+  list-style:none;
+  padding:0;
+}
+
+li {
+  padding:8px 0;
+  border-bottom:1px solid #ddd;
+}
+
+button {
+  width:100%;
+  padding:10px;
+  background:#2c7be5;
+  color:white;
+  border:none;
+  cursor:pointer;
+  margin-top: 10px;
+}
+
+.error {
+  color:red;
+  margin-top:10px;
+}
+
+.success {
+  color:green;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h2>User List</h2>
+
+<div class="nav-links">
+  <a href="/profile.html">Profile</a>
+  <a href="/edit.html">Edit profile</a>
+</div>
+
+<ul id="userList"></ul>
+
+<button id="logoutBtn">Logout</button>
+
+<div class="error" id="error"></div>
+</div>
+
+<script>
+const userList = document.getElementById("userList");
+const error = document.getElementById("error");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const token = localStorage.getItem("accessToken");
+if (!token) {
+  window.location.href = "/login.html";
+}
+
+async function fetchUsers() {
+  try {
+    const res = await fetch("http://localhost:3000/protected/list", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to fetch users");
+    }
+
+    userList.innerHTML = data.users.map(user => `<li>${user.username} (${user.email})</li>`).join('');
+
+  } catch(err) {
+    error.textContent = err.message;
+  }
+}
+
+fetchUsers();
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    const res = await fetch("http://localhost:3000/user/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken: localStorage.getItem("refreshToken") })
+    });
+
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    window.location.href = "/login.html";
+  } catch(err) {
+    error.textContent = "Logout failed";
+  }
+});
+</script>
+
+</body>
+</html>
