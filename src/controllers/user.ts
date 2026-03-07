@@ -38,16 +38,27 @@ export const login = async (req: Request, res: Response) => {
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
 
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false, // true in production
+    sameSite: "strict",
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  });
+
   res.json({
     accessToken,
-    refreshToken,
   });
 };
 
 export const logout = async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token missing" });
+  }
 
   await RefreshToken.deleteOne({ token: refreshToken });
 
+  res.clearCookie("refreshToken");
   res.json({ message: "Logged out" });
 };

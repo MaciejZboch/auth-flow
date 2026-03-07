@@ -6,15 +6,23 @@ const options = {
     info: {
       title: "JWT Auth API",
       version: "1.0.0",
-      description: "Authentication API with access and refresh tokens",
     },
     servers: [
       {
         url: "http://localhost:3000",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
-  apis: ["./src/routes/*.ts"], // location of route docs
+  apis: ["./src/routes/*.ts"],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
