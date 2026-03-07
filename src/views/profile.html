@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Profile</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.container {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 360px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 1rem;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background: #2c7be5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1a68d1;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Your Profile</h2>
+  <div id="profileData">Loading...</div>
+  <button id="logoutBtn">Logout</button>
+  <div class="error" id="errorMsg"></div>
+</div>
+
+<script>
+const profileData = document.getElementById("profileData");
+const errorMsg = document.getElementById("errorMsg");
+const logoutBtn = document.getElementById("logoutBtn");
+
+// Get token from localStorage
+const token = localStorage.getItem("accessToken");
+
+if (!token) {
+  // If no token, redirect to login
+  window.location.href = "/login.html";
+} else {
+  // Fetch protected profile route
+  fetch("http://localhost:3000/protected/profile", {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  })
+  .then(async res => {
+    if (!res.ok) {
+      throw new Error("Unauthorized or token expired");
+    }
+    return res.json();
+  })
+  .then(data => {
+    profileData.textContent = JSON.stringify(data, null, 2);
+  })
+  .catch(err => {
+    errorMsg.textContent = err.message;
+    // Optionally remove invalid token
+    localStorage.removeItem("accessToken");
+    // Redirect to login after a short delay
+    setTimeout(() => window.location.href = "/login.html", 2000);
+  });
+}
+
+// Logout button
+logoutBtn.addEventListener("click", async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (refreshToken) {
+    await fetch("http://localhost:3000/user/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken })
+    });
+  }
+  localStorage.removeItem("accessToken");
+  window.location.href = "/login.html";
+});
+</script>
+
+</body>
+</html>
