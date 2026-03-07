@@ -39,7 +39,8 @@ button {
 
 .error {
   color:red;
-  margin-top:10px;
+  font-size:0.85rem;
+  margin-top:4px;
 }
 </style>
 
@@ -52,8 +53,10 @@ button {
 <form id="loginForm">
 
 <input type="email" id="email" placeholder="Email" required>
+<div class="error" id="emailError"></div>
 
 <input type="password" id="password" placeholder="Password" required>
+<div class="error" id="passwordError"></div>
 
 <button type="submit">Login</button>
 
@@ -61,14 +64,16 @@ button {
 
 <p>Don't have an account? <a href="/register.html">Register</a></p>
 
-<div class="error" id="error"></div>
+<div class="error" id="globalError"></div>
 
 </div>
 
 <script>
 
 const form = document.getElementById("loginForm");
-const error = document.getElementById("error");
+const emailError = document.getElementById("emailError");
+const passwordError = document.getElementById("passwordError");
+const globalError = document.getElementById("globalError");
 
 if (localStorage.getItem("accessToken")) {
   window.location.href = "/profile.html";
@@ -80,31 +85,34 @@ function validateEmail(email) {
 }
 
 function validatePassword(password) {
-  return password.length >= 6 && password.length < 24;
+  return password.length >= 6 && password.length <= 20;
 }
 
 form.addEventListener("submit", async (e) => {
 
   e.preventDefault();
-  error.textContent = "";
+  emailError.textContent = "";
+  passwordError.textContent = "";
+  globalError.textContent = "";
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  // Email validation
+  let valid = true;
+
   if (!validateEmail(email)) {
-    error.textContent = "Please enter a valid email address.";
-    return;
+    emailError.textContent = "Enter a valid email address.";
+    valid = false;
   }
 
-  // Password validation
   if (!validatePassword(password)) {
-    error.textContent = "Password must be between 6 and 24 characters long.";
-    return;
+    passwordError.textContent = "Password must be 6-20 characters.";
+    valid = false;
   }
+
+  if (!valid) return;
 
   try {
-
     const res = await fetch("http://localhost:3000/user/login", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
@@ -118,11 +126,10 @@ form.addEventListener("submit", async (e) => {
     }
 
     localStorage.setItem("accessToken", data.accessToken);
-
     window.location.href = "/profile.html";
 
   } catch(err) {
-    error.textContent = err.message;
+    globalError.textContent = err.message;
   }
 
 });

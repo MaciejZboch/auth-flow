@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -39,7 +39,8 @@ button {
 
 .error {
   color:red;
-  margin-top:10px;
+  font-size:0.85rem;
+  margin-top:4px;
 }
 
 .success {
@@ -57,12 +58,16 @@ button {
 <form id="registerForm">
 
 <input type="text" id="username" placeholder="Username" required>
+<div class="error" id="usernameError"></div>
 
 <input type="email" id="email" placeholder="Email" required>
+<div class="error" id="emailError"></div>
 
 <input type="password" id="password" placeholder="Password" required>
+<div class="error" id="passwordError"></div>
 
 <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+<div class="error" id="confirmError"></div>
 
 <button type="submit">Register</button>
 
@@ -70,14 +75,18 @@ button {
 
 <p>Already have an account? <a href="/login.html">Login</a></p>
 
-<div class="error" id="error"></div>
+<div class="error" id="globalError"></div>
 
 </div>
 
 <script>
-
 const form = document.getElementById("registerForm");
-const error = document.getElementById("error");
+
+const usernameError = document.getElementById("usernameError");
+const emailError = document.getElementById("emailError");
+const passwordError = document.getElementById("passwordError");
+const confirmError = document.getElementById("confirmError");
+const globalError = document.getElementById("globalError");
 
 if (localStorage.getItem("accessToken")) {
   window.location.href = "/profile.html";
@@ -93,45 +102,49 @@ function validateEmail(email) {
 }
 
 function validatePassword(password) {
-  return password.length >= 6 && username.length <= 20;
+  return password.length >= 6 && password.length <= 20;
 }
 
 form.addEventListener("submit", async (e) => {
-
   e.preventDefault();
-  error.textContent = "";
+
+  // Clear previous errors
+  usernameError.textContent = "";
+  emailError.textContent = "";
+  passwordError.textContent = "";
+  confirmError.textContent = "";
+  globalError.textContent = "";
 
   const username = document.getElementById("username").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
 
-  // Username validation
+  let valid = true;
+
   if (!validateUsername(username)) {
-    error.textContent = "Username must be between 3 and 20 characters.";
-    return;
+    usernameError.textContent = "Username must be between 3 and 20 characters.";
+    valid = false;
   }
 
-  // Email validation
   if (!validateEmail(email)) {
-    error.textContent = "Please enter a valid email address.";
-    return;
+    emailError.textContent = "Please enter a valid email address.";
+    valid = false;
   }
 
-  // Password validation
   if (!validatePassword(password)) {
-    error.textContent = "Password must be between 6 and 20 characters.";
-    return;
+    passwordError.textContent = "Password must be between 6 and 20 characters.";
+    valid = false;
   }
 
-  // Confirm password
   if (password !== confirmPassword) {
-    error.textContent = "Passwords do not match.";
-    return;
+    confirmError.textContent = "Passwords do not match.";
+    valid = false;
   }
+
+  if (!valid) return;
 
   try {
-
     const res = await fetch("http://localhost:3000/user/register", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
@@ -145,15 +158,12 @@ form.addEventListener("submit", async (e) => {
     }
 
     localStorage.setItem("accessToken", data.accessToken);
-
     window.location.href = "/profile.html";
 
   } catch(err) {
-    error.textContent = err.message;
+    globalError.textContent = err.message;
   }
-
 });
-
 </script>
 
 </body>
