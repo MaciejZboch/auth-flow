@@ -5,6 +5,8 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 import path from "path";
 //import cookieParser = require("cookie-parser");
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
 
 import userRoutes from "./routes/user";
 import protectedRoutes from "./routes/protected";
@@ -15,7 +17,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, "./views")));
 
 //Environment variables
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) throw new Error("Missing MONGO_URI in environment variables");
@@ -24,6 +26,7 @@ if (!MONGO_URI) throw new Error("Missing MONGO_URI in environment variables");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 /*app.use(cookieParser());
 
 app.use(
