@@ -5,49 +5,57 @@ import { hashPassword, comparePassword } from "../utils/hash";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 
 export const register = async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+  try {
+    const { username, email, password } = req.body;
 
-  const hashed = await hashPassword(password);
+    const hashed = await hashPassword(password);
 
-  const user = await User.create({
-    username,
-    email,
-    password: hashed,
-  });
+    const user = await User.create({
+      username,
+      email,
+      password: hashed,
+    });
 
-  res.status(201).json({ message: "User created", userId: user._id });
+    res.status(201).json({ message: "User created", userId: user._id });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-  const valid = await comparePassword(password, user.password);
+    const valid = await comparePassword(password, user.password);
 
-  if (!valid) return res.status(401).json({ message: "Invalid credentials" });
+    if (!valid) return res.status(401).json({ message: "Invalid credentials" });
 
-  const accessToken = generateAccessToken(user._id.toString());
-  const refreshToken = generateRefreshToken(user._id.toString());
+    const accessToken = generateAccessToken(user._id.toString());
+    const refreshToken = generateRefreshToken(user._id.toString());
 
-  await RefreshToken.create({
-    userId: user._id,
-    token: refreshToken,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  });
+    await RefreshToken.create({
+      userId: user._id,
+      token: refreshToken,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: false, // true in production
-    sameSite: "strict",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-  });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, // true in production
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-  res.json({
-    accessToken,
-  });
+    res.json({
+      accessToken,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const logout = async (req: Request, res: Response) => {

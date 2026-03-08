@@ -30,6 +30,10 @@ const router = express.Router();
  *                   type: string
  *       401:
  *         description: Unauthorized (no valid token)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
  */
 router.get("/profile", authenticate, catchAsync(profile));
 
@@ -63,6 +67,8 @@ router.get("/profile", authenticate, catchAsync(profile));
  *                         type: string
  *       401:
  *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 router.get("/list", authenticate, catchAsync(list));
 
@@ -81,10 +87,13 @@ router.get("/list", authenticate, catchAsync(list));
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - username
+ *               - email
  *             properties:
  *               username:
  *                 type: string
- *                 description: New username (3-20 characters)
+ *                 description: New username
  *               email:
  *                 type: string
  *                 format: email
@@ -112,6 +121,12 @@ router.get("/list", authenticate, catchAsync(list));
  *         description: Username and email are required
  *       401:
  *         description: Unauthorized (no valid token)
+ *       404:
+ *         description: User not found
+ *       409:
+ *         description: Email already in use
+ *       500:
+ *         description: Server error
  */
 router.put("/edit", authenticate, validate(updateSchema), catchAsync(edit));
 
