@@ -1,10 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
 import helmet from "helmet";
-//import cors from "cors";
+import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
-//import cookieParser = require("cookie-parser");
+import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
 
@@ -27,19 +27,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-/*app.use(cookieParser());
+app.use(cookieParser());
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // allow server-to-server requests or curl
-      if (origin === FRONTEND_URL || origin === DEV_FRONTEND_URL)
-        return callback(null, true);
-      return callback(new Error(`Not allowed by CORS: ${origin}`));
-    },
+    origin: "http://localhost:3000",
     credentials: true,
   }),
-);*/
+);
 
 //MongoDB
 mongoose
