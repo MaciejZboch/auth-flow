@@ -6,5 +6,10 @@ cp .env.example .env
 
 docker compose up --build
 
-http://localhost:3000
+# Test with Swagger
+
 http://localhost:3000/docs/
+
+# Basic proof of concept frontend flow (to be replaced with proper React frontend in production)
+
+http://localhost:3000/login.html
