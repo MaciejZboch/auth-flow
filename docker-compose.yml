@@ -12,6 +12,17 @@ services:
       - ./src:/app/src
     restart: unless-stopped
 
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+
+        - action: rebuild
+          path: package.json
+
   mongo:
     image: mongo:7
     container_name: auth_mongo
